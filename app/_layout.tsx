@@ -7,8 +7,17 @@ import {
   TouchableOpacity,
   FlatList,
 } from "react-native";
+import Animated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withDecay,
+} from "react-native-reanimated";
 import React, { useState } from "react";
-
+import {
+  Gesture,
+  GestureDetector,
+  GestureHandlerRootView,
+} from "react-native-gesture-handler";
 const _layout = () => {
   const [firstInput, setFirstTextInput] = useState("");
   const [firstBoxTodos, setFirstBoxTodos] = useState<string[]>([]);
@@ -37,182 +46,214 @@ const _layout = () => {
   const [Fourthnput, setFourthTextInput] = useState("");
   const [FourthBoxTodos, setFourthBoxTodos] = useState<string[]>([]);
 
+  const firstTodoValues = useSharedValue({
+    x: 0,
+    y: 0,
+  });
+
+  const firstTodoValueStyles = useAnimatedStyle(() => ({
+    transform: [
+      { translateX: firstTodoValues.value.x },
+      { translateY: firstTodoValues.value.y },
+    ],
+  }));
+
   const addFourthBoxTodo = () => {
     setFourthBoxTodos((prev) => [...prev, Fourthnput]);
     setFourthTextInput("");
   };
   console.log(firstBoxTodos);
 
+  const PanGesture = Gesture.Pan()
+    .onBegin(() => {
+      console.log("Gesture started");
+    })
+    .onUpdate((event) => {
+      console.log(event.translationX, "XX");
+      console.log(event.translationY, "YY");
+      firstTodoValues.value = {
+        x: event.translationX,
+        y: event.translationY,
+      };
+    })
+    .onFinalize(() => {
+      console.log("Gesture ended");
+    });
+
   return (
-    <View style={styles.container}>
-      <View style={styles.header}>
-        <Text style={styles.headerText}>Matrix Task Manager</Text>
+    <GestureHandlerRootView>
+      <View style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.headerText}>Matrix Task Manager</Text>
+        </View>
+        <View style={styles.dragBoxContainer}>
+          <View style={styles.dragBox}>
+            <Text style={styles.dragBoxText}>Urgent & important</Text>
+            <View style={styles.addTodoContainer}>
+              <TextInput
+                onChangeText={(text) => {
+                  setFirstTextInput(text);
+                }}
+                value={firstInput}
+                placeholder="Add a new"
+                style={[styles.todoInput, firstTodoValueStyles]}
+                placeholderTextColor="#fff"
+              />
+              <TouchableOpacity onPress={addFirstBoxTodo}>
+                <Image
+                  source={require("@/assets/add.png")}
+                  style={styles.addImage}
+                />
+              </TouchableOpacity>
+            </View>
+            <View>
+              <GestureDetector gesture={PanGesture}>
+                <Animated.FlatList
+                  data={firstBoxTodos}
+                  renderItem={({ item }) => (
+                    <Text
+                      style={{
+                        padding: 5,
+                        marginLeft: 10,
+                        borderWidth: 1,
+                        width: "80%",
+                        marginTop: 10,
+                        borderColor: "darkgray",
+                        color: "black",
+                      }}
+                    >
+                      {item}
+                    </Text>
+                  )}
+                />
+              </GestureDetector>
+            </View>
+          </View>
+          <View style={styles.dragBox2}>
+            <Text style={styles.dragBoxText}>Not Urgent & important</Text>
+            <View style={styles.addTodoContainer}>
+              <TextInput
+                onChangeText={(text) => {
+                  setSecondTextInput(text);
+                }}
+                value={Secondnput}
+                placeholder="Add a new"
+                style={styles.todoInput}
+                placeholderTextColor="#fff"
+              />
+              <TouchableOpacity onPress={addSecondBoxTodo}>
+                <Image
+                  source={require("@/assets/add.png")}
+                  style={styles.addImage}
+                />
+              </TouchableOpacity>
+            </View>
+            <View>
+              <FlatList
+                data={SecondBoxTodos}
+                renderItem={({ item }) => (
+                  <Text
+                    style={{
+                      padding: 5,
+                      marginLeft: 10,
+                      borderWidth: 1,
+                      width: "80%",
+                      marginTop: 10,
+                      borderColor: "darkgray",
+                      color: "black",
+                    }}
+                  >
+                    {item}
+                  </Text>
+                )}
+              />
+            </View>
+          </View>
+          <View style={styles.dragBox3}>
+            <Text style={styles.dragBoxText}>Urgent & Not important</Text>
+            <View style={styles.addTodoContainer}>
+              <TextInput
+                onChangeText={(text) => {
+                  setThirdTextInput(text);
+                }}
+                value={Thirdnput}
+                placeholder="Add a new"
+                style={styles.todoInput}
+                placeholderTextColor="#fff"
+              />
+              <TouchableOpacity onPress={addThirdBoxTodo}>
+                <Image
+                  source={require("@/assets/add.png")}
+                  style={styles.addImage}
+                />
+              </TouchableOpacity>
+            </View>
+            <View>
+              <FlatList
+                data={ThirdBoxTodos}
+                renderItem={({ item }) => (
+                  <Text
+                    style={{
+                      padding: 5,
+                      marginLeft: 10,
+                      borderWidth: 1,
+                      width: "80%",
+                      marginTop: 10,
+                      borderRadius: 8,
+                      color: "white",
+                      backgroundColor: "black",
+                    }}
+                  >
+                    {item}
+                  </Text>
+                )}
+              />
+            </View>
+          </View>
+          <View style={styles.dragBox4}>
+            <Text style={styles.dragBoxText}>Not Urgent & Not important</Text>
+            <View style={styles.addTodoContainer}>
+              <TextInput
+                onChangeText={(text) => {
+                  setFourthTextInput(text);
+                }}
+                value={Fourthnput}
+                placeholder="Add a new"
+                style={styles.todoInput}
+                placeholderTextColor="#fff"
+              />
+              <TouchableOpacity onPress={addFourthBoxTodo}>
+                <Image
+                  source={require("@/assets/add.png")}
+                  style={styles.addImage}
+                />
+              </TouchableOpacity>
+            </View>
+            <View>
+              <FlatList
+                data={FourthBoxTodos}
+                renderItem={({ item }) => (
+                  <Text
+                    style={{
+                      padding: 5,
+                      marginLeft: 10,
+                      borderWidth: 1,
+                      width: "80%",
+                      marginTop: 10,
+                      borderRadius: 8,
+                      color: "white",
+                      backgroundColor: "black",
+                    }}
+                  >
+                    {item}
+                  </Text>
+                )}
+              />
+            </View>
+          </View>
+        </View>
       </View>
-      <View style={styles.dragBoxContainer}>
-        <View style={styles.dragBox}>
-          <Text style={styles.dragBoxText}>Urgent & important</Text>
-          <View style={styles.addTodoContainer}>
-            <TextInput
-              onChangeText={(text) => {
-                setFirstTextInput(text);
-              }}
-              value={firstInput}
-              placeholder="Add a new"
-              style={styles.todoInput}
-              placeholderTextColor="#fff"
-            />
-            <TouchableOpacity onPress={addFirstBoxTodo}>
-              <Image
-                source={require("@/assets/add.png")}
-                style={styles.addImage}
-              />
-            </TouchableOpacity>
-          </View>
-          <View>
-            <FlatList
-              data={firstBoxTodos}
-              renderItem={({ item }) => (
-                <Text
-                  style={{
-                    padding: 5,
-                    marginLeft: 10,
-                    borderWidth: 1,
-                    width: "80%",
-                    marginTop: 10,
-                    borderColor: "darkgray",
-                    color: "black",
-                  }}
-                >
-                  {item}
-                </Text>
-              )}
-            />
-          </View>
-        </View>
-        <View style={styles.dragBox2}>
-          <Text style={styles.dragBoxText}>Not Urgent & important</Text>
-          <View style={styles.addTodoContainer}>
-            <TextInput
-              onChangeText={(text) => {
-                setSecondTextInput(text);
-              }}
-              value={Secondnput}
-              placeholder="Add a new"
-              style={styles.todoInput}
-              placeholderTextColor="#fff"
-            />
-            <TouchableOpacity onPress={addSecondBoxTodo}>
-              <Image
-                source={require("@/assets/add.png")}
-                style={styles.addImage}
-              />
-            </TouchableOpacity>
-          </View>
-          <View>
-            <FlatList
-              data={SecondBoxTodos}
-              renderItem={({ item }) => (
-                <Text
-                  style={{
-                    padding: 5,
-                    marginLeft: 10,
-                    borderWidth: 1,
-                    width: "80%",
-                    marginTop: 10,
-                    borderColor: "darkgray",
-                    color: "black",
-                  }}
-                >
-                  {item}
-                </Text>
-              )}
-            />
-          </View>
-        </View>
-        <View style={styles.dragBox3}>
-          <Text style={styles.dragBoxText}>Urgent & Not important</Text>
-          <View style={styles.addTodoContainer}>
-            <TextInput
-              onChangeText={(text) => {
-                setThirdTextInput(text);
-              }}
-              value={Thirdnput}
-              placeholder="Add a new"
-              style={styles.todoInput}
-              placeholderTextColor="#fff"
-            />
-            <TouchableOpacity onPress={addThirdBoxTodo}>
-              <Image
-                source={require("@/assets/add.png")}
-                style={styles.addImage}
-              />
-            </TouchableOpacity>
-          </View>
-          <View>
-            <FlatList
-              data={ThirdBoxTodos}
-              renderItem={({ item }) => (
-                <Text
-                  style={{
-                    padding: 5,
-                    marginLeft: 10,
-                    borderWidth: 1,
-                    width: "80%",
-                    marginTop: 10,
-                    borderRadius: 8,
-                    color: "white",
-                    backgroundColor: "black",
-                  }}
-                >
-                  {item}
-                </Text>
-              )}
-            />
-          </View>
-        </View>
-        <View style={styles.dragBox4}>
-          <Text style={styles.dragBoxText}>Not Urgent & Not important</Text>
-          <View style={styles.addTodoContainer}>
-            <TextInput
-              onChangeText={(text) => {
-                setFourthTextInput(text);
-              }}
-              value={Fourthnput}
-              placeholder="Add a new"
-              style={styles.todoInput}
-              placeholderTextColor="#fff"
-            />
-            <TouchableOpacity onPress={addFourthBoxTodo}>
-              <Image
-                source={require("@/assets/add.png")}
-                style={styles.addImage}
-              />
-            </TouchableOpacity>
-          </View>
-          <View>
-            <FlatList
-              data={FourthBoxTodos}
-              renderItem={({ item }) => (
-                <Text
-                  style={{
-                    padding: 5,
-                    marginLeft: 10,
-                    borderWidth: 1,
-                    width: "80%",
-                    marginTop: 10,
-                    borderRadius: 8,
-                    color: "white",
-                    backgroundColor: "black",
-                  }}
-                >
-                  {item}
-                </Text>
-              )}
-            />
-          </View>
-        </View>
-      </View>
-    </View>
+    </GestureHandlerRootView>
   );
 };
 
